@@ -6,6 +6,13 @@ This repository contains two parts:
 
 Follow these steps to set up the project on your machine.
 
+## 0. Download the Project
+Open your terminal (Command Prompt or Git Bash) and run:
+```bash
+git clone https://github.com/AtifShahzad536/flutter_project.git
+cd flutter_project
+```
+
 ## 1. Setup Backend (PHP)
 
 Navigate to the `server-php` directory:
