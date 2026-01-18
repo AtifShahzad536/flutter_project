@@ -1,0 +1,112 @@
+﻿Analyzing mobile...                                             
+
+   info - Don't invoke 'print' in production code - lib\app.dart:9:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\api\api_client.dart:27:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\api\api_client.dart:33:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\api\token_storage.dart:10:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\api\token_storage.dart:17:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\api\token_storage.dart:24:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\api\token_storage.dart:31:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\api\token_storage.dart:37:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\core\api\token_storage.dart:43:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\services\dashboard_service.dart:7:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\services\dashboard_service.dart:11:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\services\dashboard_service.dart:12:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\services\dashboard_service.dart:17:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\data\services\dashboard_service.dart:25:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\view\auth_check_screen.dart:24:5 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\view\auth_check_screen.dart:26:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\view\auth_check_screen.dart:28:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\view\auth_check_screen.dart:30:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\view\auth_check_screen.dart:37:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\auth\view\auth_check_screen.dart:39:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\view\register_screen.dart:147:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\view\register_screen.dart:162:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\view\register_screen.dart:164:60 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\view\register_screen.dart:275:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\view\register_screen.dart:292:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\view\register_screen.dart:352:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\view\register_screen.dart:355:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\view\register_screen.dart:358:53 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\view\register_screen.dart:514:54 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\auth\view\register_screen.dart:548:48 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\features\rider\view\order_detail_screen.dart:27:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\rider\view\order_detail_screen.dart:31:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\rider\view\order_detail_screen.dart:32:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\rider\view\order_detail_screen.dart:37:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\rider\view\order_detail_screen.dart:45:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\rider\view\order_detail_screen.dart:62:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\rider\view\order_detail_screen.dart:63:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\rider\view\order_detail_screen.dart:69:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\rider\view\order_detail_screen.dart:70:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\rider\view\order_detail_screen.dart:90:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\rider\view\order_detail_screen.dart:91:7 - avoid_print
+warning - The value of the local variable 'orderCode' isn't used - lib\features\rider\view\order_detail_screen.dart:153:11 - unused_local_variable
+warning - The value of the local variable 'amount' isn't used - lib\features\rider\view\order_detail_screen.dart:154:11 - unused_local_variable
+warning - The value of the local variable 'customer' isn't used - lib\features\rider\view\order_detail_screen.dart:158:11 - unused_local_variable
+warning - The value of the local variable 'pickupLocation' isn't used - lib\features\rider\view\order_detail_screen.dart:163:11 - unused_local_variable
+warning - The value of the local variable 'deliveryLocation' isn't used - lib\features\rider\view\order_detail_screen.dart:168:11 - unused_local_variable
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\order_detail_screen.dart:258:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\order_detail_screen.dart:276:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\order_detail_screen.dart:321:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\order_detail_screen.dart:368:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\order_detail_screen.dart:423:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\order_detail_screen.dart:469:30 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\order_detail_screen.dart:494:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\order_detail_screen.dart:516:26 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\order_detail_screen.dart:615:29 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\features\rider\view\rider_dashboard_screen.dart:45:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_dashboard_screen.dart:120:41 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\features\rider\view\rider_dashboard_screen.dart:247:11 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\rider\view\rider_dashboard_screen.dart:267:9 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_dashboard_screen.dart:517:32 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_dashboard_screen.dart:540:50 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_dashboard_screen.dart:723:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_dashboard_screen.dart:724:43 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\features\rider\view\rider_dashboard_screen.dart:849:7 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_dashboard_screen.dart:888:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_dashboard_screen.dart:893:36 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_dashboard_screen.dart:910:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_dashboard_screen.dart:916:38 - deprecated_member_use
+warning - The declaration '_logout' isn't referenced - lib\features\rider\view\rider_dashboard_screen.dart:1009:8 - unused_element
+  error - The name '_logout' is already defined - lib\features\rider\view\rider_dashboard_screen.dart:1009:8 - duplicate_definition
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_history_screen.dart:117:45 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_history_screen.dart:226:32 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\features\rider\view\rider_orders_screen.dart:32:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\rider\view\rider_orders_screen.dart:34:9 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\rider\view\rider_orders_screen.dart:42:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\rider\view\rider_orders_screen.dart:138:15 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\rider\view\rider_orders_screen.dart:140:17 - avoid_print
+   info - Don't invoke 'print' in production code - lib\features\rider\view\rider_orders_screen.dart:144:17 - avoid_print
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_orders_screen.dart:339:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_orders_screen.dart:378:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_profile_screen.dart:49:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_profile_screen.dart:66:62 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_profile_screen.dart:146:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_profile_screen.dart:412:30 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_profile_screen.dart:478:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\rider\view\rider_profile_screen.dart:495:46 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\main.dart:5:3 - avoid_print
+   info - Don't invoke 'print' in production code - lib\main.dart:7:3 - avoid_print
+   info - Don't invoke 'print' in production code - lib\main.dart:9:3 - avoid_print
+
+flutter : 89 issues 
+found. (ran in 3.5s)
+At line:1 char:1
++ flutter analyze > 
+analysis_output.txt 
+2>&1
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (89 issu   
+ es found. (ran i    
+n 3.5s):String)     
+[], RemoteExcept    
+ion
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
