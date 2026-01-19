@@ -54,3 +54,26 @@ If you are looking for specific screens or features in the Flutter app, look in 
 - **`lib/main.dart`**: The starting point of the app.
 - **`lib/core/`**: Shared styles, API constants, and helper functions.
 - **`lib/data/`**: Where the app talks to the PHP server (API services).
+
+---
+
+## 📱 Web & Mobile Responsiveness
+
+The project is designed to look great on both mobile phones and web browsers (Desktop).
+
+### How it works:
+We use a special widget called **`ResponsiveLayout`** (found in `lib/core/widgets/responsive_layout.dart`). It automatically detects the screen size and switches the UI.
+
+### Examples in the code:
+- **`lib/features/auth/view/login_screen.dart`**: Uses a split-screen for Web and a centered card for Mobile.
+- **`lib/features/rider/view/rider_dashboard_screen.dart`**: Uses a Sidebar for Web and a Bottom Navigation Bar for Mobile.
+
+### How to make a new screen responsive:
+When creating a new screen, wrap it in a `ResponsiveLayout`:
+
+```dart
+return ResponsiveLayout(
+  mobile: MyMobileUI(),
+  desktop: MyDesktopUI(),
+);
+```
