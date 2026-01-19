@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/config/config.php';
 
 /**
  * Simple PSR-4 Autoloader

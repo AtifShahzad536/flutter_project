@@ -15,6 +15,7 @@ class DashboardController extends BaseController {
     }
     
     public function getDashboardStats(Request $request) {
+        \App\Middleware\AuthMiddleware::authenticate();
         $currentUser = \App\Middleware\AuthMiddleware::getUser();
         if (!$currentUser || $currentUser['role'] !== 'rider') {
             return $this->error('Access denied. Dashboard is for riders only.', 403);
@@ -84,6 +85,7 @@ class DashboardController extends BaseController {
     }
     
     public function getRiderStats(Request $request) {
+        \App\Middleware\AuthMiddleware::authenticate();
         $currentUser = \App\Middleware\AuthMiddleware::getUser();
         if (!$currentUser || $currentUser['role'] !== 'rider') {
             return $this->error('Access denied', 403);

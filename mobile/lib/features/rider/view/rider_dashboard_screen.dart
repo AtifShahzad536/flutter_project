@@ -38,12 +38,12 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
   Future<void> _fetchUserProfile() async {
     try {
       final response = await ApiClient.instance.dio.get(ApiEndpoints.profile);
-      if (response.data['success'] == true) {
-        setState(() {
+      setState(() {
+        if (response.data['success'] == true) {
           _userProfile = response.data['data'];
-          _isLoadingProfile = false;
-        });
-      }
+        }
+        _isLoadingProfile = false;
+      });
     } catch (e) {
       AppLogger.error('Error fetching user profile', e);
       setState(() => _isLoadingProfile = false);
@@ -227,9 +227,11 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                      _userProfile != null
-                                          ? _userProfile!['name'] ?? "User"
-                                          : "Loading...",
+                                      _isLoadingProfile
+                                          ? "Loading..."
+                                          : (_userProfile != null
+                                              ? _userProfile!['name'] ?? "User"
+                                              : "User Not Found"),
                                       style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14)),

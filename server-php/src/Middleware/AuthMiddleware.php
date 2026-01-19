@@ -6,6 +6,7 @@ use App\Utils\JWT;
 
 class AuthMiddleware {
     public static function authenticate() {
+        error_log("AuthMiddleware::authenticate called");
         $headers = getallheaders();
         $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? null;
         
@@ -22,6 +23,7 @@ class AuthMiddleware {
         }
         
         $payload = JWT::decode($token);
+        error_log("JWT Payload: " . json_encode($payload));
         
         if (!$payload) {
             self::sendUnauthorized('Invalid or expired token');

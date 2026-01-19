@@ -18,15 +18,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 }
 
 $request = new Request();
+error_log("Incoming Request: " . $request->getMethod() . " " . $request->getPath());
 $router = new Router($request);
 
 // Define Routes
+// Auth
 $router->post('/api/v1/auth/register', 'AuthController@register');
 $router->post('/api/v1/auth/login', 'AuthController@login');
-$router->get('/api/v1/rider/stats', 'DashboardController@getRiderStats');
-$router->get('/api/v1/rider/active-orders', 'DashboardController@getActiveOrders');
+$router->get('/api/v1/auth/profile', 'AuthController@getProfile');
+
+// Products
+$router->get('/api/v1/products', 'ProductController@getAll');
+$router->post('/api/v1/products', 'ProductController@create');
+
+// Orders
+$router->get('/api/v1/orders/available', 'OrderController@getAvailableOrders'); // Matches frontend
+$router->get('/api/v1/orders/rider', 'OrderController@getRiderOrders');         // Matches frontend
+$router->get('/api/v1/orders/my-orders', 'OrderController@getMyOrders');
+$router->post('/api/v1/orders', 'OrderController@create');
+
+// Dashboard
+$router->get('/api/v1/dashboard', 'DashboardController@getDashboardStats');     // Matches frontend
+
+// Others
+$router->get('/api/v1/notifications', 'NotificationController@getAll');
+$router->get('/api/v1/users', 'ChatController@getUsers');
+$router->get('/api/v1/chats', 'ChatController@getConversations');
+
 $router->get('/api/v1/ping', function() {
-    echo json_encode(['message' => 'pong', 'time' => date('Y-m-d H:i:s')]);
+    echo json_encode(['status' => 'success', 'message' => 'pong', 'time' => date('Y-m-d H:i:s')]);
 });
 
 // Resolve the request

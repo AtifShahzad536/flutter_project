@@ -14,6 +14,7 @@ class OrderController extends BaseController {
     }
     
     public function create(Request $request) {
+        \App\Middleware\AuthMiddleware::authenticate();
         $currentUser = $GLOBALS['current_user'] ?? null;
         if (!$currentUser) return $this->error('Unauthorized', 401);
 
@@ -54,6 +55,7 @@ class OrderController extends BaseController {
     }
     
     public function getMyOrders(Request $request) {
+        \App\Middleware\AuthMiddleware::authenticate();
         $currentUser = $GLOBALS['current_user'] ?? null;
         if (!$currentUser) return $this->error('Unauthorized', 401);
         
@@ -64,6 +66,7 @@ class OrderController extends BaseController {
     }
     
     public function getAvailableOrders(Request $request) {
+        \App\Middleware\AuthMiddleware::requireRole('rider');
         $currentUser = $GLOBALS['current_user'] ?? null;
         if (!$currentUser || $currentUser['role'] !== 'rider') {
             return $this->error('Access denied', 403);
@@ -131,6 +134,7 @@ class OrderController extends BaseController {
     }
     
     public function getRiderOrders(Request $request) {
+        \App\Middleware\AuthMiddleware::requireRole('rider');
         $currentUser = $GLOBALS['current_user'] ?? null;
         if (!$currentUser || $currentUser['role'] !== 'rider') {
             return $this->error('Access denied', 403);

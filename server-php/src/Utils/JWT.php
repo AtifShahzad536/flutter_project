@@ -3,7 +3,9 @@
 namespace App\Utils;
 
 class JWT {
-    private static $secret = JWT_SECRET;
+    private static function getSecret() {
+        return defined('JWT_SECRET') ? JWT_SECRET : 'default_secret_key';
+    }
     
     public static function encode($payload) {
         // Header
@@ -19,7 +21,7 @@ class JWT {
         $payload_encoded = self::base64UrlEncode($payload_encoded);
         
         // Signature
-        $signature = hash_hmac('sha256', $header_encoded . "." . $payload_encoded, self::$secret, true);
+        $signature = hash_hmac('sha256', $header_encoded . "." . $payload_encoded, self::getSecret(), true);
         $signature_encoded = self::base64UrlEncode($signature);
         
         return $header_encoded . "." . $payload_encoded . "." . $signature_encoded;
@@ -40,7 +42,7 @@ class JWT {
         $header_encoded = self::base64UrlEncode($header);
         $payload_encoded = self::base64UrlEncode($payload);
         
-        $expected_signature = hash_hmac('sha256', $header_encoded . "." . $payload_encoded, self::$secret, true);
+        $expected_signature = hash_hmac('sha256', $header_encoded . "." . $payload_encoded, self::getSecret(), true);
         $expected_signature_encoded = self::base64UrlEncode($expected_signature);
         
         if (!hash_equals($expected_signature_encoded, $signature)) {

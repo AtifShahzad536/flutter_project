@@ -82,13 +82,17 @@ class AuthController extends BaseController {
     }
 
     public function getProfile(Request $request) {
+        \App\Middleware\AuthMiddleware::authenticate();
         $currentUser = \App\Middleware\AuthMiddleware::getUser();
+        error_log("AuthController::getProfile - Current User: " . json_encode($currentUser));
         if (!$currentUser) {
             return $this->error('Unauthorized', 401);
         }
 
         $userModel = new \App\Models\User();
+        error_log("Attempting to get user by ID: " . $currentUser['id']);
         if ($userModel->getById($currentUser['id'])) {
+            error_log("User found: " . $userModel->name);
             return $this->success([
                 'id' => $userModel->id,
                 'name' => $userModel->name,

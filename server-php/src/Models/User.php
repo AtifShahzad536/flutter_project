@@ -84,8 +84,7 @@ class User {
                  WHERE id = ? LIMIT 1";
         
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(1, $id);
-        $stmt->execute();
+        $stmt->execute([$id]);
         
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         
