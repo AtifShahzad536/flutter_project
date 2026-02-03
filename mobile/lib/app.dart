@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'core/utils/logger.dart';
 import 'features/auth/view/auth_check_screen.dart';
 import 'features/auth/view/login_screen.dart';
-import 'features/rider/view/rider_dashboard_screen.dart';
 
 class ExportTrixApp extends StatelessWidget {
   const ExportTrixApp({super.key});
@@ -19,7 +18,7 @@ class ExportTrixApp extends StatelessWidget {
       home: const AuthCheckScreen(),
       routes: {
         '/login': (context) => const LoginScreen(),
-        '/dashboard': (context) => const RiderDashboardScreen(),
+        '/dashboard': (context) => const AuthCheckScreen(),
       },
     );
   }

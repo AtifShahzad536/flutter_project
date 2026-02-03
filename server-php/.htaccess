@@ -8,6 +8,10 @@ RewriteBase /server-php/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
+# Handle Authorization Header (must come before routing)
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
 # Route all requests to index.php
 RewriteRule ^(.*)$ index.php [QSA,L]
 

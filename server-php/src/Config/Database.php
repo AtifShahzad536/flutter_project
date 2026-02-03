@@ -17,7 +17,7 @@ class Database {
         $db_name = DB_NAME;
         $username = DB_USER;
         $password = DB_PASS;
-        $port = '3307'; // Using 3307 as seen in legacy database.php
+        $port = '3306'; // Changed from 3307 to 3306 to match netstat results
 
         try {
             $this->conn = new PDO("mysql:host=$host;port=$port;dbname=$db_name", $username, $password);

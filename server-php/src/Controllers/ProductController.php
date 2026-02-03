@@ -50,7 +50,9 @@ class ProductController extends BaseController {
     
     public function create(Request $request) {
         $currentUser = $GLOBALS['current_user'] ?? null;
-        if (!$currentUser || $currentUser['role'] !== 'seller') {
+        $role = isset($currentUser['role']) ? strtolower($currentUser['role']) : null;
+        
+        if (!$currentUser || $role !== 'seller') {
             return $this->error('Access denied', 403);
         }
         
@@ -70,7 +72,9 @@ class ProductController extends BaseController {
     
     public function update(Request $request) {
         $currentUser = $GLOBALS['current_user'] ?? null;
-        if (!$currentUser || $currentUser['role'] !== 'seller') {
+        $role = isset($currentUser['role']) ? strtolower($currentUser['role']) : null;
+        
+        if (!$currentUser || $role !== 'seller') {
             return $this->error('Access denied', 403);
         }
         
@@ -94,7 +98,9 @@ class ProductController extends BaseController {
     
     public function delete(Request $request) {
         $currentUser = $GLOBALS['current_user'] ?? null;
-        if (!$currentUser || $currentUser['role'] !== 'seller') {
+        $role = isset($currentUser['role']) ? strtolower($currentUser['role']) : null;
+        
+        if (!$currentUser || $role !== 'seller') {
             return $this->error('Access denied', 403);
         }
         

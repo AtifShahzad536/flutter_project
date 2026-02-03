@@ -66,9 +66,7 @@ class OrderController extends BaseController {
     }
     
     public function getAvailableOrders(Request $request) {
-        \App\Middleware\AuthMiddleware::requireRole('rider');
-        $currentUser = $GLOBALS['current_user'] ?? null;
-        if (!$currentUser || $currentUser['role'] !== 'rider') {
+        if (!\App\Middleware\AuthMiddleware::requireRole('rider')) {
             return $this->error('Access denied', 403);
         }
         
@@ -93,10 +91,11 @@ class OrderController extends BaseController {
     }
     
     public function pickOrder(Request $request) {
-        $currentUser = $GLOBALS['current_user'] ?? null;
-        if (!$currentUser || $currentUser['role'] !== 'rider') {
+        if (!\App\Middleware\AuthMiddleware::requireRole('rider')) {
             return $this->error('Access denied', 403);
         }
+        
+        $currentUser = $GLOBALS['current_user'] ?? null;
         
         $data = $request->getBody();
         $id = $data['id'] ?? null;
@@ -110,10 +109,11 @@ class OrderController extends BaseController {
     }
     
     public function updateStatus(Request $request) {
-        $currentUser = $GLOBALS['current_user'] ?? null;
-        if (!$currentUser || $currentUser['role'] !== 'rider') {
+        if (!\App\Middleware\AuthMiddleware::requireRole('rider')) {
             return $this->error('Access denied', 403);
         }
+        
+        $currentUser = $GLOBALS['current_user'] ?? null;
         
         $data = $request->getBody();
         $id = $data['id'] ?? null;
@@ -134,11 +134,12 @@ class OrderController extends BaseController {
     }
     
     public function getRiderOrders(Request $request) {
-        \App\Middleware\AuthMiddleware::requireRole('rider');
-        $currentUser = $GLOBALS['current_user'] ?? null;
-        if (!$currentUser || $currentUser['role'] !== 'rider') {
+        if (!\App\Middleware\AuthMiddleware::requireRole('rider')) {
             return $this->error('Access denied', 403);
         }
+        
+        $currentUser = $GLOBALS['current_user'] ?? null;
+        if (!$currentUser) return $this->error('Unauthorized', 401);
         
         $stmt = $this->order->getByRider($currentUser['id']);
         $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);

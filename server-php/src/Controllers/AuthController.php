@@ -46,18 +46,27 @@ class AuthController extends BaseController {
         $email = $data['email'] ?? null;
         $password = $data['password'] ?? null;
 
-        if (!$email || !$password) {
-            return $this->error('Email and password are required');
-        }
+        error_log("Login attempt - Email: " . ($email ?? 'null'));
+        error_log("Login attempt - Password provided: " . ($password ? 'YES' : 'NO'));
 
         $db = Database::getInstance()->getConnection();
         $stmt = $db->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->execute([$email]);
         $user = $stmt->fetch();
 
-        if (!$user || !password_verify($password, $user['password'])) {
+        if (!$user) {
+            error_log("Login failed - User not found for email: " . $email);
             return $this->error('Invalid credentials', 401);
         }
+
+        if (!password_verify($password, $user['password'])) {
+            error_log("Login failed - Password mismatch for user: " . $email);
+            // Debug: Log the hash from DB
+            error_log("Hash in DB: " . $user['password']);
+            return $this->error('Invalid credentials', 401);
+        }
+
+        error_log("Login successful for user: " . $email);
 
         // Generate Token (Mock JWT for now, can integrate JWT library later)
         // Note: Using the same logic as the root AuthMiddleware/JWT for compatibility

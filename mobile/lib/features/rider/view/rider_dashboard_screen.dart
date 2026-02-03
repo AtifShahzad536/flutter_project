@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:export_trix/core/utils/logger.dart';
-import 'package:export_trix/core/constants/api_endpoints.dart';
-import 'package:export_trix/features/auth/view/login_screen.dart';
 import 'package:export_trix/features/rider/view/rider_history_screen.dart';
 import 'package:export_trix/features/rider/view/rider_profile_screen.dart';
 import 'package:export_trix/features/rider/view/rider_orders_screen.dart';
 import 'package:export_trix/features/rider/view/order_detail_screen.dart';
 import 'package:export_trix/core/widgets/responsive_layout.dart';
-import 'package:export_trix/core/api/api_client.dart';
+import 'package:export_trix/data/services/api_service.dart';
 import 'package:export_trix/core/api/token_storage.dart';
+import 'package:export_trix/core/utils/logger.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:export_trix/features/rider/view/rider_notifications_screen.dart';
-import 'package:export_trix/features/rider/view/rider_chat_screen.dart';
 
 class RiderDashboardScreen extends StatefulWidget {
   const RiderDashboardScreen({super.key});
-
   @override
   State<RiderDashboardScreen> createState() => _RiderDashboardScreenState();
 }
@@ -23,51 +18,47 @@ class RiderDashboardScreen extends StatefulWidget {
 class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
   bool _isOnline = true;
   int _selectedIndex = 0;
-  // No longer using separate DashboardService
+  bool _isCheckingAuth = true;
+  bool _isAuthenticated = false;
   Future<List<dynamic>>? _riderOrdersFuture;
-  Map<String, dynamic>? _userProfile;
-  bool _isLoadingProfile = true;
+  Future<Map<String, dynamic>>? _dashboardStatsFuture;
 
   @override
   void initState() {
     super.initState();
-    _loadRiderOrders();
-    _fetchUserProfile();
+    _initDashboard();
   }
 
-  Future<void> _fetchUserProfile() async {
-    try {
-      final response = await ApiClient.instance.dio.get(ApiEndpoints.profile);
-      setState(() {
-        if (response.data['success'] == true) {
-          _userProfile = response.data['data'];
-        }
-        _isLoadingProfile = false;
-      });
-    } catch (e) {
-      AppLogger.error('Error fetching user profile', e);
-      setState(() => _isLoadingProfile = false);
+  Future<void> _initDashboard() async {
+    final token = await TokenStorage.getToken();
+    if (token == null || token.isEmpty || token == 'null') {
+      AppLogger.info('No token found in RiderDashboard, redirecting to login');
+      if (!mounted) return;
+      Navigator.pushReplacementNamed(context, '/login');
+      return;
     }
+
+    setState(() {
+      _isAuthenticated = true;
+      _isCheckingAuth = false;
+    });
+
+    _loadDashboardStats();
+    _loadRiderOrders();
   }
 
-  Future<void> _loadRiderOrders() async {
+  Future<void> _loadDashboardStats() async {
+    if (!_isAuthenticated) return;
     setState(() {
-      _riderOrdersFuture = _fetchRiderOrders();
+      _dashboardStatsFuture = ApiService.getDashboardStats();
     });
   }
 
-  Future<List<dynamic>> _fetchRiderOrders() async {
-    try {
-      final response =
-          await ApiClient.instance.dio.get(ApiEndpoints.riderOrders);
-      if (response.data['success'] == true) {
-        return response.data['data'] as List<dynamic>;
-      }
-      return [];
-    } catch (e) {
-      AppLogger.debug('Error fetching rider orders: $e');
-      return [];
-    }
+  Future<void> _loadRiderOrders() async {
+    if (!_isAuthenticated) return;
+    setState(() {
+      _riderOrdersFuture = ApiService.getRiderOrders();
+    });
   }
 
   @override
@@ -77,6 +68,16 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isCheckingAuth) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (!_isAuthenticated) {
+      return const SizedBox.shrink(); // Redirect is happening
+    }
+
     return ResponsiveLayout(
       mobile: _buildMobileLayout(),
       desktop: _buildDesktopLayout(),
@@ -181,67 +182,29 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                     children: [
                       Row(
                         children: [
-                          _buildHeaderIcon(Icons.notifications_outlined, () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const RiderNotificationsScreen()),
-                            );
-                          }),
+                          _buildHeaderIcon(Icons.notifications_outlined),
                           const SizedBox(width: 16),
-                          _buildHeaderIcon(Icons.chat_bubble_outline, () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const RiderChatScreen()),
-                            );
-                          }),
+                          _buildHeaderIcon(Icons.chat_bubble_outline),
                           const SizedBox(width: 24),
                           Row(
                             children: [
                               CircleAvatar(
                                 backgroundColor: const Color(0xFFEFF6FF),
-                                child: _isLoadingProfile
-                                    ? const SizedBox(
-                                        width: 20,
-                                        height: 20,
-                                        child: CircularProgressIndicator(
-                                            strokeWidth: 2))
-                                    : Text(
-                                        _userProfile != null &&
-                                                _userProfile!['name'] != null
-                                            ? _userProfile!['name']
-                                                .toString()
-                                                .substring(0, 1)
-                                                .toUpperCase()
-                                            : "U",
-                                        style: TextStyle(
-                                            color: Colors.blue[800],
-                                            fontWeight: FontWeight.bold)),
+                                child: Text("WC",
+                                    style: TextStyle(
+                                        color: Colors.blue[800],
+                                        fontWeight: FontWeight.bold)),
                               ),
                               const SizedBox(width: 12),
                               Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                      _isLoadingProfile
-                                          ? "Loading..."
-                                          : (_userProfile != null
-                                              ? _userProfile!['name'] ?? "User"
-                                              : "User Not Found"),
-                                      style: const TextStyle(
+                                  const Text("Waleed Chugtai",
+                                      style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 14)),
-                                  Text(
-                                      _userProfile != null
-                                          ? _userProfile!['role']
-                                                  ?.toString()
-                                                  .toUpperCase() ??
-                                              "RIDER"
-                                          : "Rider",
+                                  Text("Rider",
                                       style: TextStyle(
                                           color: Colors.grey.shade500,
                                           fontSize: 12)),
@@ -269,19 +232,15 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
     );
   }
 
-  Widget _buildHeaderIcon(IconData icon, VoidCallback onTap) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white,
-          border: Border.all(color: Colors.grey.shade200),
-        ),
-        child: Icon(icon, size: 20, color: Colors.grey.shade600),
+  Widget _buildHeaderIcon(IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.white,
+        border: Border.all(color: Colors.grey.shade200),
       ),
+      child: Icon(icon, size: 20, color: Colors.grey.shade600),
     );
   }
 
@@ -302,14 +261,14 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
 
   Widget _buildDesktopDashboard() {
     return FutureBuilder<Map<String, dynamic>>(
-      future: _fetchDashboardStats(),
+      future: _dashboardStatsFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
 
         if (snapshot.hasError) {
-          AppLogger.debug('Desktop dashboard error: ${snapshot.error}');
+          AppLogger.error('Desktop dashboard error', snapshot.error);
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -330,14 +289,12 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
 
         final data = snapshot.data!;
         AppLogger.debug('Desktop dashboard data received: $data');
-        final totalEarnings =
-            double.tryParse((data['today_earnings'] ?? 0).toString()) ?? 0.0;
-        final completedTrips = data['total_orders'] ?? 0;
-        final activeTrips = data['active_orders'] ?? 0;
-        final rating =
-            double.tryParse((data['avg_rating'] ?? 0).toString()) ?? 0.0;
-        final earningsGraph = data['earningsGraph'] ?? [];
-        final activeOrder = data['active_order'];
+        final totalEarnings = data['totalEarnings'] ?? 0.0;
+        final completedTrips = data['completedTrips'] ?? 0;
+        final hoursOnline = data['hoursOnline'] ?? '0h 0m';
+        final rating = data['rating'] ?? 0.0;
+        final earningsGraph = data['earningsGraph'] as List<dynamic>? ?? [];
+        final activeOrder = data['activeOrder'];
 
         return SingleChildScrollView(
           child: Column(
@@ -363,7 +320,6 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                 ],
               ),
               const SizedBox(height: 32),
-              _buildProfileAlert(),
 
               // Stats Grid
               SizedBox(
@@ -381,7 +337,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                     const SizedBox(width: 24),
                     Expanded(
                         child: _buildStatItemDesktop(
-                            title: "Trips Done",
+                            title: "Trips Completed",
                             value: "$completedTrips",
                             icon: Icons.check_circle_outline,
                             color: Colors.white,
@@ -390,9 +346,9 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                     const SizedBox(width: 24),
                     Expanded(
                         child: _buildStatItemDesktop(
-                            title: "Active Trips",
-                            value: "$activeTrips",
-                            icon: Icons.local_shipping_outlined,
+                            title: "Hours Online",
+                            value: hoursOnline,
+                            icon: Icons.timer_outlined,
                             color: const Color(0xFF1E293B),
                             startColor: Colors.white,
                             endColor: Colors.white,
@@ -413,24 +369,6 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
 
               const SizedBox(height: 40),
 
-              // Monthly Trend
-              const Text("Monthly Order Trend",
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E293B))),
-              const SizedBox(height: 16),
-              Container(
-                height: 300,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: _buildMonthlyOrdersChart(data['monthly_orders'] ?? []),
-              ),
-
               // Earnings Chart
               if (earningsGraph.isNotEmpty) ...[
                 const Text("Weekly Earnings",
@@ -447,7 +385,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.grey.shade200),
                   ),
-                  child: _buildEarningsChart(data['earningsGraph'] ?? []),
+                  child: _buildEarningsChart(earningsGraph),
                 ),
                 const SizedBox(height: 40),
               ],
@@ -502,7 +440,6 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                 ),
                 const SizedBox(height: 40),
               ],
-
               // Rider's Picked Orders
               _buildRiderOrdersSection(),
             ],
@@ -842,10 +779,10 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("Order #${order['order_id'] ?? order['id'] ?? 'N/A'}",
+                    Text("Order #${order['orderId'] ?? 'N/A'}",
                         style: const TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16)),
-                    Text("Total: \$${order['total_amount'] ?? '0.00'}",
+                    Text("\$${order['amount'] ?? '0.00'}",
                         style:
                             const TextStyle(color: Colors.grey, fontSize: 13)),
                   ],
@@ -879,10 +816,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                         fontWeight: FontWeight.bold,
                         letterSpacing: 1)),
                 const SizedBox(height: 8),
-                Text(
-                    order['customer_address'] ??
-                        order['delivery_address'] ??
-                        'No address provided',
+                Text(order['address'] ?? 'No address provided',
                     style: TextStyle(color: Colors.grey.shade700)),
               ],
             ),
@@ -905,15 +839,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                         style: TextStyle(color: Colors.grey))),
                 const SizedBox(width: 16),
                 ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => OrderDetailScreen(
-                            orderId: (order['id'] ?? '').toString()),
-                      ),
-                    );
-                  },
+                  onPressed: () {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1E3A8A),
                     foregroundColor: Colors.white,
@@ -923,38 +849,13 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 24, vertical: 12),
                   ),
-                  child: const Text("View & Update"),
+                  child: const Text("Update Status"),
                 ),
               ],
             ),
           ),
         ],
       ),
-    );
-  }
-
-  Future<Map<String, dynamic>> _fetchDashboardStats() async {
-    try {
-      final response =
-          await ApiClient.instance.dio.get(ApiEndpoints.dashboardStats);
-      if (response.data['success'] == true) {
-        return response.data['data'] as Map<String, dynamic>;
-      }
-      throw Exception(response.data['message'] ?? 'Failed to load stats');
-    } catch (e) {
-      AppLogger.debug('Error fetching dashboard stats: $e');
-      rethrow;
-    }
-  }
-
-  Future<void> _logout() async {
-    // Clear tokens and navigate to login
-    await TokenStorage.clearToken();
-    if (!mounted) return;
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-      (route) => false,
     );
   }
 
@@ -1102,6 +1003,13 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
     );
   }
 
+  Future<void> _logout() async {
+    AppLogger.info('Logging out from RiderDashboard');
+    await ApiService.logout();
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, '/login');
+  }
+
   Widget _buildBody() {
     switch (_selectedIndex) {
       case 0:
@@ -1117,330 +1025,89 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
     }
   }
 
-  Widget _buildProfileAlert() {
-    if (_userProfile == null) return const SizedBox.shrink();
-
-    final missingFields = <String>[];
-    if (_userProfile!['cnic'] == null ||
-        _userProfile!['cnic'].toString().isEmpty) {
-      missingFields.add('CNIC');
-    }
-    if (_userProfile!['bike_model'] == null ||
-        _userProfile!['bike_model'].toString().isEmpty) {
-      missingFields.add('Bike Model');
-    }
-    if (_userProfile!['bike_plate'] == null ||
-        _userProfile!['bike_plate'].toString().isEmpty) {
-      missingFields.add('Bike Number');
-    }
-
-    if (missingFields.isEmpty) return const SizedBox.shrink();
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 24),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.amber.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.amber.shade200),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.warning_amber_rounded, color: Colors.amber.shade700),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Profile Incomplete',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF92400E),
-                  ),
-                ),
-                Text(
-                  'Please fill your ${missingFields.join(", ")} in the profile section.',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.amber.shade900,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              setState(() {
-                _selectedIndex = 3; // Profile tab
-              });
-            },
-            child: const Text('Complete'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMonthlyOrdersChart(List<dynamic> monthlyData) {
-    if (monthlyData.isEmpty) {
-      return const Center(child: Text('No monthly data available'));
-    }
-
-    return BarChart(
-      BarChartData(
-        alignment: BarChartAlignment.spaceAround,
-        maxY: monthlyData
-                .map((e) => (e['orders'] as int).toDouble())
-                .reduce((a, b) => a > b ? a : b) +
-            2,
-        barTouchData: BarTouchData(enabled: true),
-        titlesData: FlTitlesData(
-          show: true,
-          bottomTitles: AxisTitles(
-            sideTitles: SideTitles(
-              showTitles: true,
-              getTitlesWidget: (double value, TitleMeta meta) {
-                int index = value.toInt();
-                if (index >= 0 && index < monthlyData.length) {
-                  return Text(monthlyData[index]['month'] ?? '',
-                      style: const TextStyle(fontSize: 10));
-                }
-                return const Text('');
-              },
-            ),
-          ),
-          leftTitles:
-              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles:
-              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          rightTitles:
-              const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-        ),
-        gridData: const FlGridData(show: false),
-        borderData: FlBorderData(show: false),
-        barGroups: monthlyData.asMap().entries.map((entry) {
-          return BarChartGroupData(
-            x: entry.key,
-            barRods: [
-              BarChartRodData(
-                toY: (entry.value['orders'] as int).toDouble(),
-                color: const Color(0xFF3B82F6),
-                width: 16,
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(4)),
-              ),
-            ],
-          );
-        }).toList(),
-      ),
-    );
-  }
-
   Widget _buildHomeTab() {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: _fetchDashboardStats(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(
-              child: Padding(
-            padding: EdgeInsets.all(40.0),
-            child: CircularProgressIndicator(),
-          ));
-        }
-
-        if (snapshot.hasError) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text('Error: ${snapshot.error}', textAlign: TextAlign.center),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => setState(() {}),
-                    child: const Text('Retry'),
-                  ),
-                ],
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding:
+                const EdgeInsets.only(top: 60, left: 24, right: 24, bottom: 30),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
+              borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(32),
+                  bottomRight: Radius.circular(32)),
             ),
-          );
-        }
-
-        final data = snapshot.data!;
-        return SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.only(
-                    top: 60, left: 24, right: 24, bottom: 30),
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(32),
-                      bottomRight: Radius.circular(32)),
-                ),
-                child: Column(
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Welcome back,',
-                              style: TextStyle(
-                                color: Colors.white70,
-                                fontSize: 16,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _isLoadingProfile
-                                  ? 'Loading...'
-                                  : (_userProfile != null
-                                      ? _userProfile!['name'] ?? 'User'
-                                      : 'User'),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          'Welcome back,',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 16,
+                          ),
                         ),
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.notifications_outlined,
-                                  color: Colors.white),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const RiderNotificationsScreen()),
-                                );
-                              },
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.chat_bubble_outline,
-                                  color: Colors.white),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const RiderChatScreen()),
-                                );
-                              },
-                            ),
-                            const SizedBox(width: 8),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: IconButton(
-                                icon: const Icon(Icons.logout,
-                                    color: Colors.white),
-                                onPressed: _logout,
-                              ),
-                            ),
-                          ],
+                        SizedBox(height: 4),
+                        Text(
+                          'Waleed Chugtai',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 30),
-                    _buildStatusToggle(),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.logout, color: Colors.white),
+                        onPressed: _logout,
+                      ),
+                    ),
                   ],
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildProfileAlert(),
-                    _buildStatsGrid(data),
-                    const SizedBox(height: 30),
-                    const Text(
-                      "Monthly Order Trend",
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1F2937)),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      height: 200,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withValues(alpha: 0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: _buildMonthlyOrdersChart(
-                          data['monthly_orders'] ?? []),
-                    ),
-                    const SizedBox(height: 30),
-                    const Text(
-                      "Earnings Overview",
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1F2937)),
-                    ),
-                    const SizedBox(height: 16),
-                    Container(
-                      height: 200,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withValues(alpha: 0.1),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: _buildEarningsChart(data['earningsGraph'] ?? []),
-                    ),
-                    const SizedBox(height: 30),
-                    const Text(
-                      "Ongoing Task",
-                      style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1F2937)),
-                    ),
-                    const SizedBox(height: 16),
-                    _buildActiveTaskCard(data['active_order']),
-                  ],
-                ),
-              ),
-            ],
+                const SizedBox(height: 30),
+                _buildStatusToggle(),
+              ],
+            ),
           ),
-        );
-      },
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildStatsGrid(),
+                const SizedBox(height: 30),
+                const Text(
+                  "Ongoing Task",
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1F2937)),
+                ),
+                const SizedBox(height: 16),
+                _buildActiveTaskCard(),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -1494,13 +1161,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
     );
   }
 
-  Widget _buildStatsGrid(Map<String, dynamic> data) {
-    final earnings =
-        double.tryParse((data['today_earnings'] ?? 0).toString()) ?? 0.0;
-    final trips = data['total_orders'] ?? 0;
-    final activeTrips = data['active_orders'] ?? 0;
-    final rating = double.tryParse((data['avg_rating'] ?? 0).toString()) ?? 0.0;
-
+  Widget _buildStatsGrid() {
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
@@ -1509,13 +1170,11 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
       crossAxisSpacing: 16,
       childAspectRatio: 1.5,
       children: [
-        _buildStatCard('Total Earnings', '\$${earnings.toStringAsFixed(2)}',
-            Icons.attach_money, Colors.green),
         _buildStatCard(
-            'Trips Done', trips.toString(), Icons.check_circle, Colors.blue),
-        _buildStatCard('Active', activeTrips.toString(), Icons.local_shipping,
-            Colors.orange),
-        _buildStatCard('Rating', rating.toString(), Icons.star, Colors.amber),
+            'Total Earnings', '\$145.80', Icons.attach_money, Colors.green),
+        _buildStatCard('Trips', '14', Icons.local_shipping, Colors.blue),
+        _buildStatCard('Hours', '6h 20m', Icons.timer, Colors.orange),
+        _buildStatCard('Rating', '4.9', Icons.star, Colors.amber),
       ],
     );
   }
@@ -1565,32 +1224,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
     );
   }
 
-  Widget _buildActiveTaskCard(Map<String, dynamic>? order) {
-    if (order == null) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.all(32),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Icon(Icons.inventory_2_outlined,
-                size: 48, color: Colors.grey.shade300),
-            const SizedBox(height: 16),
-            Text("No active tasks",
-                style: TextStyle(
-                    color: Colors.grey.shade500, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text("Pick an order from the available orders screen",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey.shade400, fontSize: 12)),
-          ],
-        ),
-      );
-    }
-
+  Widget _buildActiveTaskCard() {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -1610,9 +1244,9 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Order #${order['order_id'] ?? order['id'] ?? 'N/A'}',
-                style: const TextStyle(
+              const Text(
+                'Order #5521',
+                style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF1F2937),
@@ -1626,7 +1260,7 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  order['status'] ?? 'Pending',
+                  'Picking Up',
                   style: TextStyle(
                     color: Colors.green.shade700,
                     fontWeight: FontWeight.bold,
@@ -1639,11 +1273,11 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
           const SizedBox(height: 16),
           Row(
             children: [
-              Icon(Icons.store, color: Colors.blue.shade400, size: 20),
+              Icon(Icons.location_on, color: Colors.grey.shade400, size: 20),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  order['pickup_address'] ?? 'No pickup address',
+                  'Shop 24, Blue Area, Islamabad',
                   style: TextStyle(color: Colors.grey.shade600),
                 ),
               ),
@@ -1652,13 +1286,12 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              Icon(Icons.location_on, color: Colors.red.shade400, size: 20),
+              Icon(Icons.location_on_outlined,
+                  color: Colors.grey.shade400, size: 20),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  order['customer_address'] ??
-                      order['delivery_address'] ??
-                      'No delivery address',
+                  'House 12, Street 5, F-10/2',
                   style: TextStyle(color: Colors.grey.shade600),
                 ),
               ),
@@ -1668,24 +1301,22 @@ class _RiderDashboardScreenState extends State<RiderDashboardScreen> {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => OrderDetailScreen(
-                        orderId: (order['id'] ?? '').toString()),
-                  ),
-                );
-              },
+              onPressed: () {},
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1E3A8A),
-                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFF1E40AF),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 14),
               ),
-              child: const Text('View & Update Status'),
+              child: const Text(
+                'Mark as Picked',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
             ),
           ),
         ],

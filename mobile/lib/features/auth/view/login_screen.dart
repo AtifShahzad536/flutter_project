@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:export_trix/core/api/api_client.dart';
-import 'package:export_trix/core/api/token_storage.dart';
+import 'package:export_trix/data/services/api_service.dart';
 import 'package:export_trix/features/auth/view/register_screen.dart';
 import 'package:export_trix/features/auth/view/forgot_password_screen.dart';
 import 'package:export_trix/features/products/view/product_list_screen.dart';
@@ -58,28 +57,15 @@ class _LoginScreenState extends State<LoginScreen>
     setState(() => _isLoading = true);
     try {
       AppLogger.debug('Attempting login with email: ${_emailController.text}');
-      final response = await ApiClient.instance.dio.post(
-        '/auth/login',
-        data: {
-          'email': _emailController.text.trim(),
-          'password': _passwordController.text,
-        },
+      final data = await ApiService.login(
+        _emailController.text.trim(),
+        _passwordController.text,
       );
 
-      AppLogger.debug('Login response data: ${response.data}');
+      AppLogger.debug('Login response data: $data');
 
-      if (response.data['success'] == true) {
-        final data = response.data['data'];
-        final token = data['token'];
-        final role = data['user']['role'];
-
-        await TokenStorage.setToken(token);
-        await TokenStorage.setRole(role);
-
+      if (data['success'] == true) {
         if (!mounted) return;
-        // The new instruction implies a single dashboard route after successful login.
-        // The role-based navigation should ideally be handled within the dashboard or a routing service.
-        // For now, we follow the instruction to navigate to '/dashboard'.
         await Navigator.pushReplacementNamed(context, '/dashboard');
       } else {
         if (!mounted) return;

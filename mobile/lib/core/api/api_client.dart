@@ -1,8 +1,8 @@
 import 'package:dio/dio.dart';
 
-import 'api_config.dart';
-import 'token_storage.dart';
-import '../utils/logger.dart';
+import 'package:export_trix/core/api/api_config.dart';
+import 'package:export_trix/core/api/token_storage.dart';
+import 'package:export_trix/core/utils/logger.dart';
 
 class ApiClient {
   ApiClient._();
@@ -25,16 +25,44 @@ class ApiClient {
         onRequest: (options, handler) async {
           try {
             final token = await TokenStorage.getToken();
+
+            // List of public endpoints that don't strictly require a token
+            final publicPaths = [
+              '/auth/login',
+              '/auth/register',
+              '/auth/forgot-password',
+              '/products',
+            ];
+
+            bool isPublic =
+                publicPaths.any((path) => options.path.contains(path));
+
             AppLogger.debug(
-                'API request to ${options.path} with token: ${token != null ? "Bearer ${token.substring(0, 10)}..." : "null"}');
-            if (token != null && token.isNotEmpty) {
+                'API request to ${options.path} (Public: $isPublic)');
+
+            if (token != null && token.isNotEmpty && token != 'null') {
               options.headers['Authorization'] = 'Bearer $token';
+              AppLogger.debug('Token added to headers');
+              handler.next(options);
+            } else if (isPublic) {
+              AppLogger.debug('Public endpoint access without token');
+              handler.next(options);
+            } else {
+              AppLogger.error(
+                  'BLOCKED: Protected request to ${options.path} without valid token');
+              return handler.reject(
+                DioException(
+                  requestOptions: options,
+                  error: 'Authentication required for this endpoint',
+                  type: DioExceptionType.cancel,
+                ),
+                true,
+              );
             }
           } catch (e) {
-            AppLogger.error('Error getting token for API request', e);
-            // Continue without token if there's an error
+            AppLogger.error('Error in API interceptor', e);
+            handler.next(options);
           }
-          handler.next(options);
         },
       ),
     );

@@ -12,13 +12,12 @@ class ProductListScreen extends StatefulWidget {
 }
 
 class _ProductListScreenState extends State<ProductListScreen> {
-  final ApiService _apiService = ApiService();
   late Future<List<Product>> _productsFuture;
 
   @override
   void initState() {
     super.initState();
-    _productsFuture = _apiService.getProducts();
+    _productsFuture = ApiService.getProducts();
   }
 
   @override

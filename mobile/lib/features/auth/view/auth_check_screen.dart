@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:export_trix/core/utils/logger.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:export_trix/core/api/token_storage.dart';
 import 'package:export_trix/features/auth/view/login_screen.dart';
 import 'package:export_trix/features/rider/view/rider_dashboard_screen.dart';
 
@@ -24,10 +24,7 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
   Future<void> _checkAuthStatus() async {
     AppLogger.debug('AuthCheckScreen: Starting _checkAuthStatus');
     try {
-      AppLogger.debug('AuthCheckScreen: Getting SharedPreferences instance');
-      final prefs = await SharedPreferences.getInstance();
-      AppLogger.debug('AuthCheckScreen: Got SharedPreferences instance');
-      final token = prefs.getString('token');
+      final token = await TokenStorage.getToken();
       AppLogger.debug(
           'AuthCheckScreen: Token: ${token != null ? "exists" : "null"}');
 

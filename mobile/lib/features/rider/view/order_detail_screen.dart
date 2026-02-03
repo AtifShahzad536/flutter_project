@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:export_trix/data/services/api_service.dart';
 import 'package:export_trix/core/utils/logger.dart';
-import 'package:export_trix/core/constants/api_endpoints.dart';
-import 'package:export_trix/core/api/api_client.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   final String orderId;
@@ -26,22 +25,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Future<Map<String, dynamic>> _fetchOrderDetails() async {
     try {
       AppLogger.debug('Fetching order details for ID: ${widget.orderId}');
-      final response = await ApiClient.instance.dio.get(
-        ApiEndpoints.orderById(widget.orderId),
-      );
-      AppLogger.debug('Order detail response status: ${response.statusCode}');
-      AppLogger.debug('Order detail response data: ${response.data}');
-
-      final body = response.data;
-      if (body is Map && body['success'] == true && body['data'] is Map) {
-        final orderData = (body['data'] as Map).cast<String, dynamic>();
-        AppLogger.debug('Parsed order data: $orderData');
-        return orderData;
-      }
-      if (body is Map && body['message'] != null) {
-        throw Exception(body['message'].toString());
-      }
-      throw Exception('Failed to load order details');
+      final orderData = await ApiService.getOrderById(widget.orderId);
+      AppLogger.debug('Parsed order data: $orderData');
+      return orderData;
     } catch (e) {
       AppLogger.error('Exception in _fetchOrderDetails', e);
       rethrow;
@@ -61,32 +47,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
 
     try {
       AppLogger.debug('Attempting to pick order ${widget.orderId}');
-      AppLogger.debug('API endpoint: ${ApiEndpoints.pickOrder}');
+      await ApiService.pickOrder(widget.orderId);
 
-      final response = await ApiClient.instance.dio.post(
-        ApiEndpoints.pickOrder,
-        data: {'id': widget.orderId},
-      );
-
-      AppLogger.debug('Pick order response status: ${response.statusCode}');
-      AppLogger.debug('Pick order response data: ${response.data}');
-
-      if (response.statusCode == 200) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Order picked successfully!'),
-              backgroundColor: Colors.green,
-            ),
-          );
-          Navigator.pop(context); // Go back to orders list
-        }
-      } else {
-        final data = response.data;
-        if (data is Map && data['message'] != null) {
-          throw Exception(data['message'].toString());
-        }
-        throw Exception('Failed to pick order');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Order picked successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        Navigator.pop(context); // Go back to orders list
       }
     } catch (e) {
       AppLogger.error('Exception in _pickOrder', e);

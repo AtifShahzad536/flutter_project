@@ -46,7 +46,16 @@ class Request {
         
         if (in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'])) {
             $json = file_get_contents('php://input');
-            $data = json_decode($json, true) ?? [];
+            error_log("Raw body input: " . $json);
+            $data = json_decode($json, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                error_log("JSON Decode Error: " . json_last_error_msg());
+                $data = [];
+            } else {
+                $data = $data ?? [];
+            }
+
             if (empty($data) && $method === 'POST') {
                 foreach ($_POST as $key => $value) {
                     $data[$key] = filter_input(INPUT_POST, $key, FILTER_SANITIZE_SPECIAL_CHARS);

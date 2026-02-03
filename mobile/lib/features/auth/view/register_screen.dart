@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:export_trix/core/api/api_client.dart';
+import 'package:export_trix/data/services/api_service.dart';
 import 'package:export_trix/core/widgets/responsive_layout.dart';
 import 'dart:ui'; // For BackdropFilter
 import 'package:export_trix/core/utils/logger.dart';
@@ -60,37 +60,18 @@ class _RegisterScreenState extends State<RegisterScreen>
       try {
         AppLogger.debug(
             'Attempting to register user: ${_nameController.text.trim()}');
-        final response = await ApiClient.instance.dio.post(
-          '/auth/register',
-          data: {
-            'name': _nameController.text.trim(),
-            'email': _emailController.text.trim(),
-            'password': _passwordController.text,
-            'role': _selectedRole,
-          },
+        await ApiService.register(
+          _nameController.text.trim(),
+          _emailController.text.trim(),
+          _passwordController.text,
+          _selectedRole,
         );
 
-        AppLogger.debug('Registration response: ${response.data}');
-
-        if (response.data['success'] == true) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(
-                      response.data['message'] ?? 'Registration successful!')),
-            );
-            Navigator.pop(context); // Go back to login
-          }
-        } else {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content:
-                    Text(response.data['message'] ?? 'Registration failed'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Registration successful!')),
+          );
+          Navigator.pop(context); // Go back to login
         }
       } catch (e) {
         if (mounted) {

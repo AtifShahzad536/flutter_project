@@ -18,13 +18,12 @@ class SellerStoreScreen extends StatefulWidget {
 }
 
 class _SellerStoreScreenState extends State<SellerStoreScreen> {
-  final ApiService _apiService = ApiService();
   late Future<List<Product>> _productsFuture;
 
   @override
   void initState() {
     super.initState();
-    _productsFuture = _apiService.getSellerProducts(widget.sellerId);
+    _productsFuture = ApiService.getSellerProducts(widget.sellerId);
   }
 
   @override

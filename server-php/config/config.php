@@ -1,10 +1,10 @@
 <?php
 
 // Database Configuration
-define('DB_HOST', 'localhost');
+define('DB_HOST', '127.0.0.1');
 define('DB_NAME', 'export_trix');
 define('DB_USER', 'root');
-define('DB_PASS', '');
+define('DB_PASS', 'root');
 
 // JWT Configuration
 define('JWT_SECRET', 'your_jwt_secret_key_change_this_in_production');

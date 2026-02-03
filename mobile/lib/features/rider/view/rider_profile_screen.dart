@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:export_trix/core/api/api_client.dart';
-import 'package:export_trix/core/constants/api_endpoints.dart';
+import 'package:export_trix/data/services/api_service.dart';
 import 'package:export_trix/core/utils/logger.dart';
 
 class RiderProfileScreen extends StatefulWidget {
@@ -29,19 +28,16 @@ class _RiderProfileScreenState extends State<RiderProfileScreen> {
 
   Future<void> _fetchUserProfile() async {
     try {
-      final response = await ApiClient.instance.dio.get(ApiEndpoints.profile);
-      if (response.data['success'] == true) {
-        final data = response.data['data'];
-        setState(() {
-          _nameController.text = data['name'] ?? '';
-          _phoneController.text = data['phone'] ?? '';
-          // These might be in business_profile or similar, check API
-          _bikeModelController.text = data['bike_model'] ?? 'Not Set';
-          _bikePlateController.text = data['number_plate'] ?? 'Not Set';
-          _cnicController.text = data['cnic'] ?? 'Not Set';
-          _isLoading = false;
-        });
-      }
+      final data = await ApiService.getProfile();
+      setState(() {
+        _nameController.text = data['name'] ?? '';
+        _phoneController.text = data['phone'] ?? '';
+        // These might be in business_profile or similar, check API
+        _bikeModelController.text = data['bike_model'] ?? 'Not Set';
+        _bikePlateController.text = data['number_plate'] ?? 'Not Set';
+        _cnicController.text = data['cnic'] ?? 'Not Set';
+        _isLoading = false;
+      });
     } catch (e) {
       AppLogger.error('Error fetching user profile', e);
       setState(() => _isLoading = false);
